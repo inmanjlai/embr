@@ -1,0 +1,15 @@
+extends layout
+
+block content
+    article
+        header 
+            h2 Login
+            p.error=message
+        form(action="/login" method="POST")
+            label(for="email") Email
+            input(type="text" placeholder="email" name="email")
+            label(for="password") Password 
+            input(type="password" placeholder="********" name="password")
+            button(type="submit") Login 
+        hr
+        a(href="/signup" role="button").secondary.full-width Don't have an account yet? Sign up 

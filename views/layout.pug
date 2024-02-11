@@ -1,0 +1,16 @@
+html 
+    head 
+        title embr 
+        link(rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css")
+        link(rel="stylesheet", href="global.css")
+    body 
+        main.container 
+            nav 
+                hgroup 
+                    h1 embr
+                    p Ignite your ideas
+                if user
+                    ul
+                        li=`Logged in as ${user.username}`
+                        li: a(href="/logout" role="button") Logout
+            block content

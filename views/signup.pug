@@ -1,0 +1,23 @@
+extends layout
+
+block content 
+    article
+        header 
+            h2 Sign up
+            p.error=message
+        form(action="/signup" method="POST")
+            label(for="username") Username
+            input(type="text" placeholder="username" name="username")
+
+            label(for="email") Email
+            input(type="email" placeholder="email" name="email")
+
+            label(for="password") Password 
+            input(type="password" placeholder="********" name="password")
+
+            label(for="repeat-password") Repeat Password 
+            input(type="password" placeholder="********" name="repeat-password")
+            
+            button(type="submit") Sign up 
+        hr
+        a(href="/login" role="button").secondary.full-width Already have an account? Login 
