@@ -8,8 +8,27 @@ datasource db {
 }
 
 model users {
-  id            String    @id @default("'r'||lower(hex(randomblob(7)))")
+  id            String       @id @default("'r'||lower(hex(randomblob(7)))")
   username      String
   email         String
   password_hash String
+  posts         posts[]
+  user_posts    user_posts[]
+}
+
+model posts {
+  id         String       @id @default("'r'||lower(hex(randomblob(7)))")
+  title      String
+  content    String
+  user_id    String
+  user       users        @relation(fields: [user_id], references: [id])
+  user_posts user_posts[]
+}
+
+model user_posts {
+  id      String @id @default("'r'||lower(hex(randomblob(7)))")
+  user_id String
+  post_id String
+  user    users  @relation(fields: [user_id], references: [id])
+  post    posts  @relation(fields: [post_id], references: [id])
 }
