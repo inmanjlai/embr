@@ -14,6 +14,8 @@ model users {
   password_hash String
   posts         posts[]
   user_posts    user_posts[]
+  likes         likes[]
+  comments      comments[]
 }
 
 model posts {
@@ -23,6 +25,8 @@ model posts {
   user_id    String
   user       users        @relation(fields: [user_id], references: [id])
   user_posts user_posts[]
+  likes      likes[]
+  comments   comments[]
 }
 
 model user_posts {
@@ -31,4 +35,21 @@ model user_posts {
   post_id String
   user    users  @relation(fields: [user_id], references: [id])
   post    posts  @relation(fields: [post_id], references: [id])
+}
+
+model likes {
+  id      String @id @default("'r'||lower(hex(randomblob(7)))")
+  user_id String
+  post_id String
+  user    users  @relation(fields: [user_id], references: [id])
+  post    posts  @relation(fields: [post_id], references: [id])
+}
+
+model comments {
+  id            String    @id @default("'r'||lower(hex(randomblob(7)))")
+  content       String
+  user_id       String
+  post_id       String
+  user          users    @relation(fields: [user_id], references: [id])
+  post          posts    @relation(fields: [post_id], references: [id])
 }
