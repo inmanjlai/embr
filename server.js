@@ -142,12 +142,81 @@ app.post('/posts', async(req, res) => {
                     <i class="fa-solid fa-comment"></i>
                     <p>${ post.comments.length }</p>
                 </div>
+                <div hx-get=/posts/${post.id}/edit hx-swap="outerHTML transition:true" hx-target=#post-${post.id} data-tooltip="Edit">
+                    <button><i class='fa-solid fa-pen'></i></button>
+                </div>
                 <div class="post-controls-inner" hx-delete=/posts/${post.id} hx-swap="outerHTML transition:true" hx-target=#post-${post.id}>
                     <button>
                         <i class="fa-solid fa-trash"></i>
                     </button>
                 </div>
             </footer>
+        </article>
+    `
+
+    return res.send(response);
+});
+
+app.get('/posts/:post_id', async(req, res) => {
+    let post = await prisma.posts.findFirst({
+        where: {
+            id: req.params.post_id
+        },
+        include: {
+            user: true,
+            likes: true,
+            comments: true
+        }
+    });
+
+    let response = `
+        <article id="post-${post.id}">
+            <hgroup>
+                <h6>${ post.title }</h6>
+                <p>${ post.user.username }</p>
+            </hgroup>
+            <p>${ post.content }</p>
+            <footer class="post-controls">
+                <div hx-post=/likes/${ post.id } hx-swap="innerHTML transition:true" class="post-controls-inner">
+                    <button><i class="fa-solid fa-heart"></i></button>
+                    <p>${ post.likes.length }</p>
+                </div>
+                <div class="post-controls-inner">
+                    <i class="fa-solid fa-comment"></i>
+                    <p>${ post.comments.length }</p>
+                </div>
+                <div hx-get=/posts/${post.id}/edit hx-swap="outerHTML transition:true" hx-target=#post-${post.id} data-tooltip="Edit">
+                    <button><i class='fa-solid fa-pen'></i></button>
+                </div>
+                <div class="post-controls-inner" hx-delete=/posts/${post.id} hx-swap="outerHTML transition:true" hx-target=#post-${post.id}>
+                    <button>
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
+            </footer>
+        </article>
+    `
+
+    res.send(response)
+});
+
+app.get('/posts/:post_id/edit', async(req, res) => {
+    let post = await prisma.posts.findFirst({
+        where: {
+            id: req.params.post_id
+        }
+    });
+
+    let response = `
+        <article id='post-${post.id}'>
+            <form hx-put='/posts/${post.id}' hx-swap='outerHTML transition:true' hx-target='#post-${post.id}'>
+                <input type='text' value='${post.title}' name='title' placeholder='Title' />
+                <textarea rows='4' name='content' placeholder='Content'>${post.content}</textarea>
+                <div role='group'>
+                    <button class='secondary' hx-get='/posts/${post.id}' hx-swap='outerHTML transition:true' hx-target='#post-${post.id}'>Cancel</button>
+                    <button type='submit'>Confirm</button>
+                </div>
+            </form>
         </article>
     `
 
@@ -171,7 +240,60 @@ app.delete('/posts/:post_id', async(req, res) => {
     })
 
     return res.send()
-})
+});
+
+app.put('/posts/:post_id', async(req, res) => {
+    await prisma.posts.update({
+        where: {
+            id: req.params.post_id
+        },
+        data: {
+            title: req.body.title,
+            content: req.body.content
+        }
+    })
+
+    let post = await prisma.posts.findFirst({
+        where: {
+            id: req.params.post_id
+        },
+        include: {
+            user: true,
+            likes: true,
+            comments: true
+        }
+    });
+
+    let response = `
+        <article id="post-${post.id}">
+            <hgroup>
+                <h6>${ post.title }</h6>
+                <p>${ post.user.username }</p>
+            </hgroup>
+            <p>${ post.content }</p>
+            <footer class="post-controls">
+                <div hx-post=/likes/${ post.id } hx-swap="innerHTML transition:true" class="post-controls-inner">
+                    <button><i class="fa-solid fa-heart"></i></button>
+                    <p>${ post.likes.length }</p>
+                </div>
+                <div class="post-controls-inner">
+                    <i class="fa-solid fa-comment"></i>
+                    <p>${ post.comments.length }</p>
+                </div>
+                <div hx-get=/posts/${post.id}/edit hx-swap="outerHTML transition:true" hx-target=#post-${post.id} data-tooltip="Edit">
+                    <button><i class='fa-solid fa-pen'></i></button>
+                </div>
+                <div class="post-controls-inner" hx-delete=/posts/${post.id} hx-swap="outerHTML transition:true" hx-target=#post-${post.id}>
+                    <button>
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
+            </footer>
+        </article>
+    `
+
+    return res.send(response);
+});
 
 // LIKE ROUTES
 app.post('/likes/:post_id', async(req, res) => { 

@@ -26,6 +26,8 @@ block content
                             i.fa-solid.fa-comment
                             p=post.comments.length
                         if post.user_id == user.id
-                            div(hx-delete=`/posts/${post.id}` hx-swap="outerHTML transition:true" hx-target=`#post-${post.id}`).post-controls-inner
+                            div(hx-get=`/posts/${post.id}/edit` hx-swap="outerHTML transition:true" hx-target=`#post-${post.id}` data-tooltip="Edit") 
+                                button: i.fa-solid.fa-pen
+                            div(hx-delete=`/posts/${post.id}` hx-swap="outerHTML transition:true" hx-target=`#post-${post.id}` data-tooltip="Delete").post-controls-inner
                                 button: i.fa-solid.fa-trash
 

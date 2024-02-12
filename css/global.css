@@ -40,3 +40,7 @@ nav ul li {
 .logout:hover {
     text-decoration: none;
 }
+
+div[data-tooltip] {
+    border-bottom: none;
+}
