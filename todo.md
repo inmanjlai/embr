@@ -2,10 +2,10 @@
 - User Auth
 - Posts
 - Likes
+- Make Likes Dynamic
 
 ## Todo
 ### Features
-- Make Likes Dynamic
 - Comments
 - Followers
 - User Page

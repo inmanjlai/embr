@@ -5,8 +5,6 @@
  * Copyright 2019-2024 - Licensed under MIT
  */
 
-console.log('hello world')
-
 // Config
 const isOpenClass = "modal-is-open";
 const openingClass = "modal-is-opening";
@@ -17,7 +15,6 @@ let visibleModal = null;
 
 // Toggle modal
 const toggleModal = (event) => {
-    console.log('we are here')
   event.preventDefault();
   const modal = document.getElementById(event.currentTarget.dataset.target);
   if (!modal) return;

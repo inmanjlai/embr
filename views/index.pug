@@ -5,22 +5,27 @@ block content
         article
             header
                 h1 New Post
-            form(action="/posts" method="POST")
+            form
                 input(type="text" placeholder="Title" name="title")
                 textarea(name="content" placeholder="Content")
-                button(type="submit") Post
+                button(type="submit" hx-post='/posts' hx-swap="beforebegin" hx-target="#post-container" onclick="toggleModal(event)" data-target="new-post-modal") Post
 
     if posts
-        for post in posts
-            article
-                hgroup
-                    h6=post.title
-                    p=post.user.username
-                p=post.content
-                footer.post-controls
-                    form(action=`/likes/${post.id}` method="POST").post-controls-inner
-                        button(type="submit"): i.fa-solid.fa-heart
-                        p=post.likes.length
-                    div.post-controls-inner
-                        i.fa-solid.fa-comment
-                        p=post.comments.length
+        div#post-container
+            for post in posts
+                article(id=`post-${post.id}`)
+                    hgroup
+                        h6=post.title
+                        p=post.user.username
+                    p=post.content
+                    footer.post-controls
+                        div(hx-post=`/likes/${post.id}` hx-swap="innerHTML transition:true").post-controls-inner
+                            button: i.fa-solid.fa-heart
+                            p=post.likes.length
+                        div.post-controls-inner
+                            i.fa-solid.fa-comment
+                            p=post.comments.length
+                        if post.user_id == user.id
+                            div(hx-delete=`/posts/${post.id}` hx-swap="outerHTML transition:true" hx-target=`#post-${post.id}`).post-controls-inner
+                                button: i.fa-solid.fa-trash
+

@@ -28,9 +28,8 @@ app.get('/', async(req, res) => {
     if (!req.session.user) return res.redirect('/login')
 
     let posts = await prisma.posts.findMany({ include: { user: true, comments: true, likes: true } });
-    console.log(posts[0])
 
-    res.render('index', { user: req.session.user, posts })
+    res.render('index', { user: req.session.user, posts: posts.reverse() })
 });
 
 // AUTH ROUTES
@@ -103,23 +102,80 @@ app.get('/logout', (req, res) => {
 
 // POST ROUTES
 app.post('/posts', async(req, res) => {
-    if (!req.session.user) return res.redirect('/login');
+    if (!req.session.user) return res.set('HX-Redirect', '/login').send();
+
+    let new_post_id = nanoid()
 
     await prisma.posts.create({
         data: {
-            id: nanoid(),
+            id: new_post_id,
             title: req.body.title,
             content: req.body.content,
             user_id: req.session.user.id
         }
     })
 
-    return res.redirect('/')
+    let post = await prisma.posts.findFirst({
+        where: {
+            id: new_post_id
+        },
+        include: {
+            user: true,
+            likes: true,
+            comments: true
+        }
+    })
+
+    let response = `
+        <article id="post-${post.id}">
+            <hgroup>
+                <h6>${ post.title }</h6>
+                <p>${ post.user.username }</p>
+            </hgroup>
+            <p>${ post.content }</p>
+            <footer class="post-controls">
+                <div hx-post=/likes/${ post.id } hx-swap="innerHTML transition:true" class="post-controls-inner">
+                    <button><i class="fa-solid fa-heart"></i></button>
+                    <p>${ post.likes.length }</p>
+                </div>
+                <div class="post-controls-inner">
+                    <i class="fa-solid fa-comment"></i>
+                    <p>${ post.comments.length }</p>
+                </div>
+                <div class="post-controls-inner" hx-delete=/posts/${post.id} hx-swap="outerHTML transition:true" hx-target=#post-${post.id}>
+                    <button>
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
+            </footer>
+        </article>
+    `
+
+    return res.send(response);
 });
+
+app.delete('/posts/:post_id', async(req, res) => {
+    if (!req.session.user) return res.set("HX-Redirect", "/login").send()
+    let post_to_delete = await prisma.posts.findFirst({
+        where: {
+            id: req.params.post_id
+        }
+    });
+
+    if (req.session.user.id != post_to_delete.user_id) return res.send("Nice try buddy, but this ain't yours!");
+
+    await prisma.posts.delete({
+        where: {
+            id: req.params.post_id
+        }
+    })
+
+    return res.send()
+})
 
 // LIKE ROUTES
 app.post('/likes/:post_id', async(req, res) => { 
-    if (!req.session.user) return res.redirect('/login')
+    if (!req.session.user) return res.set("HX-Redirect", "/login").send()
 
     let like_exists = await prisma.likes.findFirst({
         where: {
@@ -145,7 +201,18 @@ app.post('/likes/:post_id', async(req, res) => {
 
     }
 
-    return res.redirect('/')
+    let curr_post = await prisma.posts.findFirst({
+        where: {
+            id: req.params.post_id
+        },
+        include: {
+            likes: true
+        }
+    });
+
+    let response = `<button><i class='fa-solid fa-heart'></i></button> <p>${curr_post.likes.length}</p>`
+
+    return res.send(response)
 });
 
 app.listen(PORT, () => console.log('Server listening at http://localhost:' + PORT));
