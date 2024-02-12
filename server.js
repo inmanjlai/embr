@@ -24,13 +24,16 @@ app.use(session({
 const prisma = new PrismaClient()
 
 // BASIC NAV ROUTES
-app.get('/', (req, res) => {
+app.get('/', async(req, res) => {
     if (!req.session.user) return res.redirect('/login')
-    res.render('index', { user: req.session.user })
+
+    let posts = await prisma.posts.findMany({ include: { user: true, comments: true, likes: true } });
+    console.log(posts[0])
+
+    res.render('index', { user: req.session.user, posts })
 });
 
 // AUTH ROUTES
-
 app.get('/login', (req, res) => {
     if (req.session.user) return res.redirect('/');
     res.render('login');
@@ -39,7 +42,7 @@ app.get('/login', (req, res) => {
 app.get('/signup', (req, res) => {
     if (req.session.user) return res.redirect('/');
     res.render('signup');
-})
+});
 
 app.post('/login', async(req, res) => {
     if (!req.body.email || !req.body.password) {
@@ -67,7 +70,7 @@ app.post('/login', async(req, res) => {
     }
 
     return res.render('login', { message: "Invalid email / password combination" })
-})
+});
 
 app.post('/signup', async(req, res) => {
     if (req.body.password != req.body['repeat-password']) return res.render('signup', {message: 'Both password fields must match'})
@@ -90,13 +93,59 @@ app.post('/signup', async(req, res) => {
         res.cookie('userid', req.session.user.id, { maxAge: 900000 })
         return res.redirect('/')
     })
-})
+});
 
 app.get('/logout', (req, res) => {
     req.session.destroy();
     res.clearCookie('userid');
     return res.redirect('/login');
-})
+});
 
+// POST ROUTES
+app.post('/posts', async(req, res) => {
+    if (!req.session.user) return res.redirect('/login');
+
+    await prisma.posts.create({
+        data: {
+            id: nanoid(),
+            title: req.body.title,
+            content: req.body.content,
+            user_id: req.session.user.id
+        }
+    })
+
+    return res.redirect('/')
+});
+
+// LIKE ROUTES
+app.post('/likes/:post_id', async(req, res) => { 
+    if (!req.session.user) return res.redirect('/login')
+
+    let like_exists = await prisma.likes.findFirst({
+        where: {
+            user_id: req.session.user.id,
+            post_id: req.params.post_id
+        }
+    });
+
+    if (like_exists) {
+        await prisma.likes.delete({
+            where: {
+                id: like_exists.id
+            }
+        })
+    } else {
+        await prisma.likes.create({
+            data: {
+                id: nanoid(),
+                user_id: req.session.user.id,
+                post_id: req.params.post_id
+            }
+        });
+
+    }
+
+    return res.redirect('/')
+});
 
 app.listen(PORT, () => console.log('Server listening at http://localhost:' + PORT));

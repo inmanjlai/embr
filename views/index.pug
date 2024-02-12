@@ -1,4 +1,26 @@
 extends layout
 
 block content 
-    h1 Index
+    dialog#new-post-modal
+        article
+            header
+                h1 New Post
+            form(action="/posts" method="POST")
+                input(type="text" placeholder="Title" name="title")
+                textarea(name="content" placeholder="Content")
+                button(type="submit") Post
+
+    if posts
+        for post in posts
+            article
+                hgroup
+                    h6=post.title
+                    p=post.user.username
+                p=post.content
+                footer.post-controls
+                    form(action=`/likes/${post.id}` method="POST").post-controls-inner
+                        button(type="submit"): i.fa-solid.fa-heart
+                        p=post.likes.length
+                    div.post-controls-inner
+                        i.fa-solid.fa-comment
+                        p=post.comments.length

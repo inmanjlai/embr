@@ -1,3 +1,42 @@
 .full-width {
     width: 100%;
 }
+
+.post-controls, .post-controls-inner {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.post-controls p {
+    margin: 0;
+}
+
+.post-controls-inner {
+    gap: 0.5rem;
+    margin: 0;
+}
+
+.post-controls button {
+    display: flex;
+    padding: 0;
+    margin: 0;
+    align-items: center;
+    color: inherit;
+    background-color: transparent;
+    border: none;
+}
+
+nav ul li {
+    display: flex;
+    align-items: center;
+}
+
+.new-post:hover {
+    cursor: pointer;
+}
+
+.logout:hover {
+    text-decoration: none;
+}
